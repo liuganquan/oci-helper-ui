@@ -1,0 +1,33 @@
+{
+  "name": "oracle-cloud-grabber",
+  "version": "1.0.0",
+  "description": "Oracle Cloud 资源抢占工具",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "telegram-service"
+  ],
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:telegram\"",
+    "start:backend": "npm run start -w backend",
+    "start:frontend": "npm run start -w frontend",
+    "start:telegram": "npm run start -w telegram-service",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:telegram\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev -w backend",
+    "dev:telegram": "npm run dev -w telegram-service",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build -w frontend",
+    "install:all": "npm install"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ioredis": "^5.4.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2"
+  }
+}
