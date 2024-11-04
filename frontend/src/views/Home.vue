@@ -85,7 +85,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const configs = ref([])
 const dialogVisible = ref(false)
@@ -149,7 +149,7 @@ const fetchConfigs = async () => {
     configs.value = response.data
   } catch (error) {
     console.error('Error fetching configs:', error) // 调试日志
-    ElMessage.error('获取配置列表���败')
+    ElMessage.error('获取配置列表失败')
   }
 }
 
@@ -164,12 +164,14 @@ const deleteConfig = async (id) => {
         type: 'warning'
       }
     )
-    await axios.delete(`/api/oci-config/${id}`)
+    
+    const response = await axios.delete(`/api/oci-config/${id}`)
     ElMessage.success('配置删除成功')
     await fetchConfigs()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('配置删除失败')
+      console.error('删除配置失败:', error)
+      ElMessage.error(error.response?.data?.error || '配置删除失败')
     }
   }
 }
