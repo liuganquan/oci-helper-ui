@@ -37,8 +37,17 @@ ADMIN_USERNAME ,ADMIN_PASSWORD为登录用户名密码，可以修改
 redis服务配置地址默认为我部署的，可以修改成用自己的
 
 如果要使用自己的电报监听，就需要修改telegram-service中的env，
+
 TELEGRAM_API_ID，TELEGRAM_API_HASH，TELEGRAM_PHONE，TELEGRAM_STRING_SESSION都修改成自己的
 TELEGRAM_CHANNEL_ID一般监听的频道都是 https://t.me/agentONE_R, id为1796453976
 
 然后使用命令pm2 start ecosystemnotele.config.js启动没有电报监听的
 或者pm2 start ecosystem.config.js启动有电报监听的(需要配置好对应的电报配置)
+
+
+截图:
+![monitor1](https://raw.githubusercontent.com/liuganquan/oci-helper-ui/refs/heads/main/doc/monitor1.png)
+![monitor1](https://raw.githubusercontent.com/liuganquan/oci-helper-ui/refs/heads/main/doc/monitor2.png)
+![monitor1](https://raw.githubusercontent.com/liuganquan/oci-helper-ui/refs/heads/main/doc/monitor3.png)
+![monitor1](https://raw.githubusercontent.com/liuganquan/oci-helper-ui/refs/heads/main/doc/monitor4.png)
+![monitor1](https://raw.githubusercontent.com/liuganquan/oci-helper-ui/refs/heads/main/doc/monitor5.png)
