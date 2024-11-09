@@ -61,12 +61,11 @@ class GrabService {
 
     // 生成随机密码
     generatePassword() {
-        const length = 12;
-        const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
         let password = '';
-        for (let i = 0; i < length; i++) {
-            const randomIndex = Math.floor(Math.random() * charset.length);
-            password += charset[randomIndex];
+        for (let i = 0; i < 32; i++) {
+            const randomIndex = Math.floor(Math.random() * chars.length);
+            password += chars[randomIndex];
         }
         return password;
     }
@@ -198,15 +197,31 @@ rm -rf /etc/ssh/sshd_config.d/* && rm -rf /etc/ssh/ssh_config.d/*
             const task = await GrabTask.findById(taskId);
             const config = await OciConfig.findById(task.profile_id);
             
+            // 检查当前实例数量
+            if (task.current_count >= task.target_count) {
+                await GrabTask.updateStatus(taskId, 'success');
+                await GrabTask.addLog(taskId, 'SUCCESS', '已达到目标数量，任务完成');
+                this.cleanup(taskId);
+                return;
+            }
+
             const initialWaitTime = this.getRandomWaitTime(task.wait_time);
             await GrabTask.addLog(taskId, 'INFO', `等待 ${initialWaitTime} 秒后开始抢机...`);
             await this.wait(initialWaitTime);
             
             while (this.runningTasks.has(taskId) && !this.taskCancelTokens.get(taskId).cancelled) {
-                // 检查数据库中的任务状态
+                // 每次循环都重新检查数据库中的任务状态和实例数量
                 const currentTask = await GrabTask.findById(taskId);
                 if (currentTask.status !== 'running') {
                     console.log(`任务 ${taskId} 状态已变更为 ${currentTask.status}，停止抢机`);
+                    this.cleanup(taskId);
+                    break;
+                }
+
+                // 检查是否已达到目标数量
+                if (currentTask.current_count >= currentTask.target_count) {
+                    await GrabTask.updateStatus(taskId, 'success');
+                    await GrabTask.addLog(taskId, 'SUCCESS', '已达到目标数量，任务完成');
                     this.cleanup(taskId);
                     break;
                 }
@@ -217,13 +232,6 @@ rm -rf /etc/ssh/sshd_config.d/* && rm -rf /etc/ssh/ssh_config.d/*
                     if (result.success) {
                         await GrabTask.addLog(taskId, 'SUCCESS', `成功抢到第 ${task.current_count + 1} 台机器`);
                         await GrabTask.incrementCount(taskId);
-                        
-                        if (task.current_count + 1 >= task.target_count) {
-                            await GrabTask.updateStatus(taskId, 'success');
-                            await GrabTask.addLog(taskId, 'SUCCESS', '已达到目标数量，任务完成');
-                            this.cleanup(taskId);
-                            break;
-                        }
                         
                         const waitTime = this.getRandomWaitTime(task.wait_time);
                         await GrabTask.addLog(taskId, 'INFO', `等待 ${waitTime} 秒后继续抢下一台...`);

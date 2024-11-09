@@ -56,10 +56,17 @@ class TelegramService {
         if (!this.client) return;
         
         this.client.addEventHandler(async (event) => {
-            if (event.message && event.message.peerId.channelId.toString() === channelId) {
-                const message = event.message.message;
-                await this.redis.publish('stock_notification', message);
-                console.log('发布消息到Redis:', message);
+            try {
+                if (event.message && 
+                    event.message.peerId && 
+                    event.message.peerId.channelId && 
+                    event.message.peerId.channelId.toString() === channelId) {
+                    const message = event.message.message;
+                    await this.redis.publish('stock_notification', message);
+                    console.log('发布消息到Redis:', message);
+                }
+            } catch (error) {
+                console.error('处理Telegram消息时出错:', error);
             }
         });
         
